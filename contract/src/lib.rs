@@ -31,7 +31,11 @@ impl Default for Contract {
 impl Contract {
     pub fn add_account_info(&mut self, public_key: String) {
         let account_id = env::signer_account_id();
-        self.account_map.insert(&account_id, &AccountInfo::new(public_key));
+        let account_info_option = self.account_map.get(&account_id);
+        match account_info_option {
+            Some(account_info) => panic!("Account info already added!"),
+            None => self.account_map.insert(&account_id, &AccountInfo::new(public_key)),
+        };
     }
 
     pub fn get_account_public_key(&self, account_id: AccountId) -> Option<String> {
@@ -160,6 +164,7 @@ mod tests {
         let mut contract = Contract::default();
 
         contract.add_account_info("I am a happy public key!".to_string());
+        // contract.add_account_info("I am a happy public key part 2!".to_string());
         let public_key = contract.get_account_public_key("alice.testnet".parse::<AccountId>().unwrap());
         assert_eq!(
             public_key,

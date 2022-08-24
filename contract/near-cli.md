@@ -1,5 +1,15 @@
 # NEAR CLI
 
+## Test contract (show output)
+```
+cargo test -- --nocapture
+```
+
+## Build contract code
+```
+sh build.sh
+```
+
 ## Delete contract subaccount (good practice)
 ```
 near delete healthcare.rohanphanse.testnet rohanphanse.testnet
@@ -22,7 +32,7 @@ near call healthcare.rohanphanse.testnet add_account_info '{"public_key": "roror
 
 ## Get account public key (view)
 ```
-near view healthcare.rohanphanse.testnet get_account_public_key '{"account_id": "rohanphanse.testnet"}'
+near view healthcare.rohanphanse.testnet get_account_public_key '{"account_id": "doc.rohanphanse.testnet"}'
 ```
 
 ## Add contributor (call)

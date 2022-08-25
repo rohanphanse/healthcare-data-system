@@ -1,52 +1,43 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { accountBalance, login, logout } from "./utils/near";
-import contract, { getAccountDataIds } from "./utils/contract";
+import { Link } from "react-router-dom";
+import * as contract from "./utils/contract";
+import AccountInfo from "./components/AccountInfo";
 
-function App() {
+const App = () => {
     const account = window.walletConnection.account();
-    // Balance
-    const [balance, updateBalance] = useState("0");
-    const fetchBalance = useCallback(async () => {
-        if (account.accountId) {
-            updateBalance(await accountBalance());
-        }
-    }, [account.accountId]);
-    useEffect(() => {
-        fetchBalance();
-    }, [fetchBalance])
 
-    // Uploaded data
-    const [uploadedData, updateUploadedData] = useState([]);
-    const fetchUploadedData = useCallback(async () => {
+    // Data entries
+    const [dataEntries, updateDataEntries] = useState([]);
+    const fetchDataEntries = useCallback(async () => {
         if (account.accountId) {
-            await getAccountDataIds();
+            let entries = []
+            let ids = (await contract.getAccountDataIds(account.accountId)) || [];
+            console.log(account.accountId, ids)
+            for (const id of ids) {
+                let title = await contract.getDataTitle(id)
+                entries.push({ id, title })
+            }
+            updateDataEntries(entries)
+            console.log(entries)
         }
-    })
+    }, [account.accountId])
+    useEffect(() => {
+        fetchDataEntries();
+    }, [fetchDataEntries]);
 
     return (
         <>
-            <div className = "title">Unified Healthcare Data System</div>
-            {account.accountId ? (
-                <>
-                    <div>{account.accountId}</div>
-                    <div>Balance: {balance} NEAR</div>
-                    <button onClick={logout}>LOG OUT</button>
-                    <div>Uploaded Data:</div>
-                    
-                </>
-            ) : (
-                <button onClick={login}>CONNECT WALLET</button>
-            )}
+            <AccountInfo account = {account} />
+            <div><b>Your Data:</b></div>
+            <ul className = "data-entries">
+                {account.accountId ? (
+                    dataEntries.map(({ id, title }) => (
+                        <li>{title}&nbsp;<Link to = {`/data/${id}`} key = {id}>(view)</Link></li>
+                    ))
+                ) : ""}
+            </ul>
             <style jsx>{`
-                .title {
-                    font-style: italic;
-                }
-
-                .center {
-                    display: flex;
-                    flex-direction: row;
-                    justify-content: center;
-                }
+                
             `}</style>
         </>
     );

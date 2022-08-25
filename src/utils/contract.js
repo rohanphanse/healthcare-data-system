@@ -18,8 +18,8 @@ export async function removeContributor(removed_contributor) {
     return await window.contract.remove_contributor({ removed_contributor });
 }
 
-export async function uploadData(account_id, encrypted_symmetric_key, encrypted_data) {
-    return await window.contract.upload_data({ account_id, encrypted_symmetric_key, encrypted_data });
+export async function uploadData(account_id, data_id, encrypted_symmetric_key, encrypted_data, title) {
+    return await window.contract.upload_data({ account_id, data_id, encrypted_symmetric_key, encrypted_data, title });
 }
 
 export async function getAccountDataIds(account_id) {
@@ -34,6 +34,10 @@ export async function getEncryptedData(data_id) {
     return await window.contract.get_encrypted_data({ data_id });
 } 
 
-export async function getUploader(data_id) {
-    return await window.contract.get_uploader({ data_id });
+export async function getDataUploader(data_id) {
+    return await window.contract.get_data_uploader({ data_id });
 } 
+
+export async function getDataTitle(data_id) {
+    return await window.contract.get_data_title({ data_id });
+}

@@ -42,7 +42,7 @@ near call healthcare.rohanphanse.testnet add_contributor '{ "new_contributor": "
 
 ## Get account contributors (view)
 ```
-near view healthcare.rohanphanse.testnet get_account_contributors '{ "account_id": "rohanphanse.testnet" }'
+near view healthcare.rohanphanse.testnet get_account_contributors '{ "account_id": "doc.rohanphanse.testnet" }'
 ```
 
 ## Remove contributor (call)
@@ -52,7 +52,7 @@ near call healthcare.rohanphanse.testnet remove_contributor '{ "removed_contribu
 
 ## Upload data (call)
 ```
-near call healthcare.rohanphanse.testnet upload_data '{ "account_id": "rohanphanse.testnet", "encrypted_symmetric_key": "rokey!", "encrypted_data": "rodata!" }' --accountId rohanphanse.testnet
+near call healthcare.rohanphanse.testnet upload_data '{ "account_id": "rohanphanse.testnet", "data_id": "d63g", "encrypted_symmetric_key": "232323dsdd", "encrypted_data": "Enc data :)", "title": "Title 2" }' --accountId doc.rohanphanse.testnet
 ```
 
 ## Get account data IDs (view)
@@ -62,15 +62,20 @@ near view healthcare.rohanphanse.testnet get_account_data_ids '{ "account_id": "
 
 ## Get encrypted symmetric key (view)
 ```
-near view healthcare.rohanphanse.testnet get_encrypted_symmetric_key '{ "data_id": 2 }'
+near view healthcare.rohanphanse.testnet get_encrypted_symmetric_key '{ "data_id": "d63g" }'
 ```
 
 ## Get encrypted data (view)
 ```
-near view healthcare.rohanphanse.testnet get_encrypted_data '{ "data_id": 0 }'
+near view healthcare.rohanphanse.testnet get_encrypted_data '{ "data_id": "dfssdf" }'
 ```
 
-## Get uploader (view)
+## Get data uploader (view)
 ```
-near view healthcare.rohanphanse.testnet get_uploader '{ "data_id": 2 }'
+near view healthcare.rohanphanse.testnet get_data_uploader '{ "data_id": "3e3uedh3dhd" }'
+```
+
+## Get data title (view)
+```
+near view healthcare.rohanphanse.testnet get_data_title '{ "data_id": "3e3uedsh3dhd" }'
 ```

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { accountBalance, login, logout } from "./utils/near";
-import contract from "./utils/contract";
+import contract, { getAccountDataIds } from "./utils/contract";
 
 function App() {
     const account = window.walletConnection.account();
@@ -15,6 +15,14 @@ function App() {
         fetchBalance();
     }, [fetchBalance])
 
+    // Uploaded data
+    const [uploadedData, updateUploadedData] = useState([]);
+    const fetchUploadedData = useCallback(async () => {
+        if (account.accountId) {
+            await getAccountDataIds();
+        }
+    })
+
     return (
         <>
             <div className = "title">Unified Healthcare Data System</div>
@@ -23,6 +31,8 @@ function App() {
                     <div>{account.accountId}</div>
                     <div>Balance: {balance} NEAR</div>
                     <button onClick={logout}>LOG OUT</button>
+                    <div>Uploaded Data:</div>
+                    
                 </>
             ) : (
                 <button onClick={login}>CONNECT WALLET</button>

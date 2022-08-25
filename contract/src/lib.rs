@@ -1,6 +1,6 @@
 use near_sdk::borsh::{ self, BorshDeserialize, BorshSerialize };
 use near_sdk::{ env, near_bindgen, AccountId };
-use near_sdk::collections::{ UnorderedMap, UnorderedSet, Vector };
+use near_sdk::collections::{ UnorderedMap, UnorderedSet };
 
 mod account;
 use account::{ AccountInfo };
@@ -11,7 +11,7 @@ use storage::{ DataId, DataEntry };
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
     account_map: UnorderedMap<AccountId, AccountInfo>,
-    storage_list: Vector<DataEntry>,
+    storage_map: UnorderedMap<DataId, DataEntry>,
     contributors_map: UnorderedMap<AccountId, UnorderedSet<AccountId>>,
     data_ids_map: UnorderedMap<AccountId, UnorderedSet<DataId>>,
 }
@@ -20,7 +20,7 @@ impl Default for Contract {
     fn default() -> Self {
         Self {
             account_map: UnorderedMap::<AccountId, AccountInfo>::new(b"a".to_vec()),
-            storage_list: Vector::<DataEntry>::new(b"s".to_vec()),
+            storage_map: UnorderedMap::<DataId, DataEntry>::new(b"s".to_vec()),
             contributors_map: UnorderedMap::<AccountId, UnorderedSet<AccountId>>::new(b"c".to_vec()),
             data_ids_map: UnorderedMap::<AccountId, UnorderedSet<DataId>>::new(b"d".to_vec()),
         }
@@ -33,7 +33,7 @@ impl Contract {
         let account_id = env::signer_account_id();
         let account_info_option = self.account_map.get(&account_id);
         match account_info_option {
-            Some(account_info) => panic!("Account info already added!"),
+            Some(_) => panic!("Account info already added!"),
             None => self.account_map.insert(&account_id, &AccountInfo::new(public_key)),
         };
     }
@@ -81,7 +81,7 @@ impl Contract {
         self.contributors_map.insert(&account_id, &contributors);
     }
 
-    pub fn upload_data(&mut self, account_id: AccountId, encrypted_symmetric_key: String, encrypted_data: String) -> DataId {
+    pub fn upload_data(&mut self, account_id: AccountId, data_id: DataId, encrypted_symmetric_key: String, encrypted_data: String, title: String) {
         let signer_id = env::signer_account_id();
         if signer_id != account_id {
             let contributors_option = self.contributors_map.get(&account_id);
@@ -95,9 +95,14 @@ impl Contract {
                 None => panic!("{}", unallowed_contributor_error),
             }
         }
-        let data_entry = DataEntry::new(signer_id, encrypted_symmetric_key, encrypted_data);
-        self.storage_list.push(&data_entry);
-        let data_id = self.storage_list.len() - 1;
+        if let Some(_) = self.storage_map.get(&data_id) {
+            panic!("Data entry with id {} already exists! Choose another id.", &data_id);
+        }
+        if data_id.len() > 20 && data_id.len() < 1 {
+            panic!("Data id must be between 1 and 20 characters in length!");
+        }
+        let data_entry = DataEntry::new(signer_id, encrypted_symmetric_key, encrypted_data, title);
+        self.storage_map.insert(&data_id, &data_entry);
         match self.data_ids_map.get(&account_id) {
             None => {
                 let set_id: Vec<u8> = format!("d-{}", account_id).as_bytes().to_vec();
@@ -108,7 +113,6 @@ impl Contract {
         let mut data_ids = self.data_ids_map.get(&account_id).unwrap();
         data_ids.insert(&data_id);
         self.data_ids_map.insert(&account_id, &data_ids);
-        data_id
     }
 
     pub fn get_account_data_ids(&self, account_id: AccountId) -> Vec<DataId> {
@@ -120,7 +124,7 @@ impl Contract {
     }
 
     pub fn get_encrypted_data(&self, data_id: DataId) -> Option<String> {
-        let data_entry_option = self.storage_list.get(data_id);
+        let data_entry_option = self.storage_map.get(&data_id);
         match data_entry_option {
             Some(data_entry) => return Some(data_entry.get_encrypted_data()),
             None => return None,
@@ -128,17 +132,25 @@ impl Contract {
     }
 
     pub fn get_encrypted_symmetric_key(&self, data_id: DataId) -> Option<String> {
-        let data_entry_option = self.storage_list.get(data_id);
+        let data_entry_option = self.storage_map.get(&data_id);
         match data_entry_option {
             Some(data_entry) => return Some(data_entry.get_encrypted_symmetric_key()),
             None => return None,
         }
     }
 
-    pub fn get_uploader(&self, data_id: DataId) -> Option<AccountId> {
-        let data_entry_option = self.storage_list.get(data_id);
+    pub fn get_data_uploader(&self, data_id: DataId) -> Option<AccountId> {
+        let data_entry_option = self.storage_map.get(&data_id);
         match data_entry_option {
             Some(data_entry) => return Some(data_entry.get_uploader()),
+            None => return None,
+        }
+    }
+
+    pub fn get_data_title(&self, data_id: DataId) -> Option<String> {
+        let data_entry_option = self.storage_map.get(&data_id);
+        match data_entry_option {
+            Some(data_entry) => return Some(data_entry.get_title()),
             None => return None,
         }
     }
@@ -200,14 +212,12 @@ mod tests {
         testing_env!(context.build());
         let mut contract = Contract::default();
 
-        let id_1 = contract.upload_data("alice.testnet".parse::<AccountId>().unwrap(), "enc sym key!".to_string(), "enc data!".to_string());
+        contract.upload_data("alice.testnet".parse::<AccountId>().unwrap(), "My First Piece of Data".to_string(), "enc sym key!".to_string(), "enc data!".to_string(), "titel 1".to_string());
         // let error_2 = contract.upload_data("alice_near".parse::<AccountId>().unwrap(), "enc sym key!".to_string(), "enc data!".to_string());
-        let id_3 = contract.upload_data("alice.testnet".parse::<AccountId>().unwrap(), "enc sym key 2!".to_string(), "enc data 2!".to_string());
-        println!("Result 1: {:?}", id_1);
-        println!("Result 3: {:?}", id_3);
+        contract.upload_data("alice.testnet".parse::<AccountId>().unwrap(), "2nd-data-id".to_string(), "enc sym key 2!".to_string(), "enc data 2!".to_string(), "title 3".to_string());
         println!("Data ids: {:?}", contract.get_account_data_ids("alice.testnet".parse::<AccountId>().unwrap()));
-        println!("Uploader id 1: {:?}", contract.get_uploader(id_1));
-        println!("Key id 3: {:?}", contract.get_encrypted_symmetric_key(id_3));
-        println!("Data id 3: {:?}", contract.get_encrypted_data(id_3));
+        println!("Uploader id 1: {:?}", contract.get_data_uploader("My First Piece of Data".to_string()));
+        println!("Key id 3: {:?}", contract.get_encrypted_symmetric_key("2nd-data-id".to_string()));
+        println!("Data id 3: {:?}", contract.get_encrypted_data("My First Piece of Data".to_string()));
     }
 }

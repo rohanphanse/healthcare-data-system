@@ -27,7 +27,7 @@ near deploy --wasmFile wasm/unified_healthcare_contract.wasm --accountId healthc
 
 ## Add account info (call)
 ```
-near call healthcare.rohanphanse.testnet add_account_info '{"public_key": "rororo"}' --accountId rohanphanse.testnet
+near call healthcare.rohanphanse.testnet add_account_info '{"public_key": "doc2323dhd3h7d3di3g3u3djh3dj3d"}' --accountId doc.rohanphanse.testnet
 ```
 
 ## Get account public key (view)

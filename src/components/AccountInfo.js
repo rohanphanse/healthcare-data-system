@@ -16,7 +16,7 @@ export default function AccountInfo({ account }) {
         <>
             <h2 className = "title">Unified Healthcare Data System</h2>
             {account.accountId ? (
-                <div class = "account-info">
+                <div className = "account-info">
                     <div><b>Account:</b> {account.accountId}</div>
                     <div><b>Balance:</b> {balance} NEAR</div>
                     <button onClick={logout}>LOG OUT</button> 

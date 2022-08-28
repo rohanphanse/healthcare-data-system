@@ -7,6 +7,10 @@ export default function AccountInfo({ account }) {
     const fetchBalance = useCallback(async () => {
         if (account.accountId) {
             updateBalance(await accountBalance());
+            if (localStorage.getItem("account") !== account.accountId) {
+                localStorage.removeItem("privateKey")
+                localStorage.setItem("account", account.accountId)
+            }
         }
     }, [account.accountId]);
     useEffect(() => {

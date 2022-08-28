@@ -27,12 +27,12 @@ near deploy --wasmFile wasm/unified_healthcare_contract.wasm --accountId healthc
 
 ## Add account info (call)
 ```
-near call healthcare.rohanphanse.testnet add_account_info '{"public_key": "doc2323dhd3h7d3di3g3u3djh3dj3d"}' --accountId doc.rohanphanse.testnet
+near call healthcare.rohanphanse.testnet add_account_info '{"public_key": "pub_key"}' --accountId rohanphanse.testnet
 ```
 
 ## Get account public key (view)
 ```
-near view healthcare.rohanphanse.testnet get_account_public_key '{"account_id": "doc.rohanphanse.testnet"}'
+near view healthcare.rohanphanse.testnet get_account_public_key '{"account_id": "rohanphanse.testnet"}'
 ```
 
 ## Add contributor (call)
@@ -50,14 +50,19 @@ near view healthcare.rohanphanse.testnet get_account_contributors '{ "account_id
 near call healthcare.rohanphanse.testnet remove_contributor '{ "removed_contributor": "doc.rohanphanse.testnet" }' --accountId rohanphanse.testnet
 ```
 
+## Remove data (call)
+```
+near call healthcare.rohanphanse.testnet remove_data '{ "data_id": "etyxlz" }' --accountId rohanphanse-2.testnet
+```
+
 ## Upload data (call)
 ```
-near call healthcare.rohanphanse.testnet upload_data '{ "account_id": "rohanphanse.testnet", "data_id": "d63g", "encrypted_symmetric_key": "232323dsdd", "encrypted_data": "Enc data :)", "title": "Title 2" }' --accountId doc.rohanphanse.testnet
+near call healthcare.rohanphanse.testnet upload_data '{ "account_id": "rohanphanse.testnet", "data_id": "e3dsddssdd3", "encrypted_symmetric_key": "232323dsdd", "encrypted_data": "Enc data :)", "title": "Important Data" }' --accountId rohanphanse.testnet
 ```
 
 ## Get account data IDs (view)
 ```
-near view healthcare.rohanphanse.testnet get_account_data_ids '{ "account_id": "rohanphanse.testnet" }'
+near view healthcare.rohanphanse.testnet get_account_data_ids '{ "account_id": "rohanphanse-2.testnet" }'
 ```
 
 ## Get encrypted symmetric key (view)
@@ -78,4 +83,9 @@ near view healthcare.rohanphanse.testnet get_data_uploader '{ "data_id": "3e3ued
 ## Get data title (view)
 ```
 near view healthcare.rohanphanse.testnet get_data_title '{ "data_id": "3e3uedsh3dhd" }'
+```
+
+## Delete account (call)
+```
+near call healthcare.rohanphanse.testnet delete_account '{}' --accountId rohanphanse.testnet
 ```

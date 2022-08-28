@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom"
 import React, { useState, useEffect, useCallback } from "react";
 import AccountInfo from "./AccountInfo";
 import * as contract from "../utils/contract";
-import { getPrivateKey, uploadOrGetPublicKey } from "../utils/cryptography"
+import * as cryptography from "../utils/cryptography"
 
 export default function DataEntry() {
     const account = window.walletConnection.account();
@@ -13,23 +13,35 @@ export default function DataEntry() {
             let entry = {}
             let ids = await contract.getAccountDataIds(account.accountId)
             if (!ids.includes(id)) {
-                entry.notFound = true
+                entry.error = true
+                entry.errorMessage = `No data entry found for id of "${id}"`
                 updateDataEntry(entry)
                 return;
             }
-            const encryptedSymmetricKey = await contract.getEncryptedSymmetricKey(id)
-            const encryptedData = await contract.getEncryptedData(id)
-            const uploader = await contract.getDataUploader(id)
-            const title = await contract.getDataTitle(id)
-            entry = {
-                uploader,
-                data: encryptedData,
-                title,
+            try {
+                const encryptedSymmetricKey = await contract.getEncryptedSymmetricKey(id)
+                const encryptedData = await contract.getEncryptedData(id)
+                const uploader = await contract.getDataUploader(id)
+                const title = await contract.getDataTitle(id)
+                const privateKey = await cryptography.importPrivateKey(JSON.parse(localStorage.getItem("privateKey")))
+                console.log(privateKey)
+                const decryptedSym = await cryptography.privateKeyDecrypt(privateKey, encryptedSymmetricKey) 
+                const symKey = await cryptography.importSymmetricKey(JSON.parse(decryptedSym).key)
+                const decIV = cryptography.hexToBuffer(JSON.parse(decryptedSym).iv)
+                const decryptedData = await cryptography.symmetricKeyDecrypt(symKey, decIV, encryptedData)
+                console.log("decdata", decryptedData)
+                updateDataEntry({
+                    title,
+                    uploader,
+                    data: decryptedData
+                })
+            } catch (e) {
+                console.log(e)
+                updateDataEntry({
+                    error: true,
+                    errorMessage: "Decryption error. Make sure you entered your private key correctly or check if you have access to this data."
+                })
             }
-            let publicKey = await uploadOrGetPublicKey(account)
-            let privateKey = await getPrivateKey()
-            console.log(publicKey, privateKey)
-            updateDataEntry(entry)
         }
     }, [account.accountId])
     useEffect(() => {
@@ -39,12 +51,13 @@ export default function DataEntry() {
     return (
         <>
             <AccountInfo account = {account} />
-            {dataEntry.notFound ? (
-                ""
+            {dataEntry.error ? (
+                <div><i>{dataEntry.errorMessage}</i></div>
             ) : (
                 <>
                     <div><b>Title:</b> {dataEntry.title}</div>
                     <div><b>Data:</b> {dataEntry.data}</div>
+                    <div><b>Uploader:</b> {dataEntry.uploader}</div>
                 </>
             )}
             <div className = "back-link">

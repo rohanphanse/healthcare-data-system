@@ -154,6 +154,32 @@ impl Contract {
             None => return None,
         }
     }
+
+    pub fn delete_account(&mut self) {
+        let account_id = env::signer_account_id();
+        self.account_map.remove(&account_id);
+        self.contributors_map.remove(&account_id);
+        if let Some(data_ids) = self.data_ids_map.get(&account_id) {
+            for id in data_ids.iter() {
+                self.storage_map.remove(&id);
+            }
+        }
+        self.data_ids_map.remove(&account_id);
+    }
+
+    pub fn remove_data(&mut self, data_id: DataId) {
+        let account_id = env::signer_account_id();
+        let mut data_ids: UnorderedSet<DataId>;
+        match self.data_ids_map.get(&account_id) {
+            Some(d) => data_ids = d,
+            None => return,
+        }
+        if data_ids.contains(&data_id) {
+            self.storage_map.remove(&data_id);
+            data_ids.remove(&data_id);
+            self.data_ids_map.insert(&account_id, &data_ids);
+        }
+    }
 }
 
 #[cfg(test)]
@@ -219,5 +245,9 @@ mod tests {
         println!("Uploader id 1: {:?}", contract.get_data_uploader("My First Piece of Data".to_string()));
         println!("Key id 3: {:?}", contract.get_encrypted_symmetric_key("2nd-data-id".to_string()));
         println!("Data id 3: {:?}", contract.get_encrypted_data("My First Piece of Data".to_string()));
+        // contract.delete_account();
+        // println!("Deleted: {:?}", contract.get_account_data_ids("alice.testnet".parse::<AccountId>().unwrap()));
+        contract.remove_data("2nd-data-id".to_string());
+        println!("Key id 3: {:?}", contract.get_encrypted_symmetric_key("2nd-data-id".to_string()));
     }
 }

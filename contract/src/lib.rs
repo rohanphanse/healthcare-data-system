@@ -98,7 +98,7 @@ impl Contract {
         if let Some(_) = self.storage_map.get(&data_id) {
             panic!("Data entry with id {} already exists! Choose another id.", &data_id);
         }
-        if data_id.len() > 20 && data_id.len() < 1 {
+        if data_id.len() > 20 || data_id.len() < 1 {
             panic!("Data id must be between 1 and 20 characters in length!");
         }
         let data_entry = DataEntry::new(signer_id, encrypted_symmetric_key, encrypted_data, title);

@@ -1,9 +1,9 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import App from "./App";
+import React from "react"
+import ReactDOM from "react-dom"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import App from "./App"
 import DataEntry from "./components/DataEntry"
-import { initializeContract } from "./utils/near";
+import { initializeContract } from "./utils/near"
 
 window.nearInitPromise = initializeContract()
     .then(() => {

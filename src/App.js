@@ -153,7 +153,7 @@ const App = () => {
                             <>
                                 <div>
                                     <b>View Your Private Key:&nbsp;</b>
-                                    <input type="checkbox" onClick={() => updatePrivateKeyFieldVis(!showPrivateKeyField)} value={showPrivateKeyField} />
+                                    <input type="checkbox" onClick={() => updatePrivateKeyFieldVis(!showPrivateKeyField)} checked={showPrivateKeyField} />
                                 </div>
                                 {showPrivateKeyField && (
                                     <>

@@ -57,7 +57,7 @@ near call healthcare.rohanphanse.testnet remove_data '{ "data_id": "etyxlz" }' -
 
 ## Upload data (call)
 ```
-near call healthcare.rohanphanse.testnet upload_data '{ "account_id": "rohanphanse.testnet", "data_id": "e3dsddssdd3", "encrypted_symmetric_key": "232323dsdd", "encrypted_data": "Enc data :)", "title": "Important Data" }' --accountId rohanphanse.testnet
+near call healthcare.rohanphanse.testnet upload_data '{ "account_id": "rohanphanse-2.testnet", "data_id": "doc4life", "encrypted_symmetric_key": "{ key: 45a6c20f7f9e9bb96186992cc6610fc5876d087ca07aa8b9b32eab7ec70f711698731ec72e8e50740c47fa9aae85e7fbbb26acb7ee4c2b5180126a7faf651f5c615e3fcc3b752bba5b6db2f0fd0ef9c3d2c3ceb86de50118dddf09d46cbfc72daeeb615d, iv: ""}", "encrypted_data": "c8e59858d9ce32235e1def929cabf5aa9819060b5d0225bf34", "title": "From the doc!" }' --accountId doc.rohanphanse.testnet
 ```
 
 ## Get account data IDs (view)
@@ -72,7 +72,7 @@ near view healthcare.rohanphanse.testnet get_encrypted_symmetric_key '{ "data_id
 
 ## Get encrypted data (view)
 ```
-near view healthcare.rohanphanse.testnet get_encrypted_data '{ "data_id": "dfssdf" }'
+near view healthcare.rohanphanse.testnet get_encrypted_data '{ "data_id": "5nx1eh" }'
 ```
 
 ## Get data uploader (view)
@@ -88,4 +88,9 @@ near view healthcare.rohanphanse.testnet get_data_title '{ "data_id": "3e3uedsh3
 ## Delete account (call)
 ```
 near call healthcare.rohanphanse.testnet delete_account '{}' --accountId rohanphanse.testnet
+```
+
+## Remove data (call)
+```
+near call healthcare.rohanphanse.testnet remove_data '{ "data_id": "rlp0fm" }' --accountId rohanphanse.testnet
 ```

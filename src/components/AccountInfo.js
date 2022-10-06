@@ -3,11 +3,18 @@ import { accountBalance, login, logout } from "../utils/near";
 
 export default function AccountInfo({ account }) {
     // Balance
-    const [balance, updateBalance] = useState("0");
+    const [balance, updateBalance] = useState(localStorage.getItem("balance") || "---.--");
     const fetchBalance = useCallback(async () => {
         if (account.accountId) {
-            updateBalance(await accountBalance());
+            // Fetch current balance on each page visit
+            let _balance = await accountBalance()
+            // Cache last balance
+            localStorage.setItem("balance", _balance)
+            updateBalance(_balance)
+            // Check for locally saved account
             if (localStorage.getItem("account") !== account.accountId) {
+                // Remove private key of prior account
+                // This will prompt current account to enter private key
                 localStorage.removeItem("privateKey")
                 localStorage.setItem("account", account.accountId)
             }

@@ -10,10 +10,10 @@ use storage::{ DataId, DataEntry };
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
-    account_map: UnorderedMap<AccountId, AccountInfo>,
-    storage_map: UnorderedMap<DataId, DataEntry>,
-    contributors_map: UnorderedMap<AccountId, UnorderedSet<AccountId>>,
-    data_ids_map: UnorderedMap<AccountId, UnorderedSet<DataId>>,
+    account_map: UnorderedMap<AccountId, AccountInfo>,                  // Map each account to its public key
+    storage_map: UnorderedMap<DataId, DataEntry>,                       // Map each data id to its data entry
+    contributors_map: UnorderedMap<AccountId, UnorderedSet<AccountId>>, // Map each account to its contributors
+    data_ids_map: UnorderedMap<AccountId, UnorderedSet<DataId>>,        // Map each account to its data entry ids
 }
 
 impl Default for Contract {
@@ -32,6 +32,9 @@ impl Contract {
     pub fn add_account_info(&mut self, public_key: String) {
         let account_id = env::signer_account_id();
         let account_info_option = self.account_map.get(&account_id);
+        // Account information can only be uploaded once
+        // This prevents confusion caused by modifying the public key
+        // To upload a new public key, first delete the old account
         match account_info_option {
             Some(_) => panic!("Account info already added!"),
             None => self.account_map.insert(&account_id, &AccountInfo::new(public_key)),
@@ -49,6 +52,7 @@ impl Contract {
     pub fn add_contributor(&mut self, new_contributor: AccountId) {
         let account_id = env::signer_account_id();
         let contributors_option = self.contributors_map.get(&account_id);
+        // Initialize new list, add new contributor
         match contributors_option {
             None => {
                 let set_id: Vec<u8> = format!("c-{}", account_id).as_bytes().to_vec();
@@ -83,9 +87,11 @@ impl Contract {
 
     pub fn upload_data(&mut self, account_id: AccountId, data_id: DataId, encrypted_symmetric_key: String, encrypted_data: String, title: String) {
         let signer_id = env::signer_account_id();
+        // Only the user and allowed contributors can upload data to the user's account
         if signer_id != account_id {
             let contributors_option = self.contributors_map.get(&account_id);
             let unallowed_contributor_error = format!("{} is not an allowed contributor to {}'s account", signer_id, account_id);
+            // Prevent unauthorized contributors
             match contributors_option {
                 Some(contributors) => {
                     if !contributors.contains(&signer_id) { 
@@ -95,14 +101,18 @@ impl Contract {
                 None => panic!("{}", unallowed_contributor_error),
             }
         }
+        // Each data entry must be stored at a unique id
+        // Length of id must be between 1 and 20 characters
         if let Some(_) = self.storage_map.get(&data_id) {
             panic!("Data entry with id {} already exists! Choose another id.", &data_id);
         }
         if data_id.len() > 20 || data_id.len() < 1 {
             panic!("Data id must be between 1 and 20 characters in length!");
         }
+        // Upload data entry: uploader, encrypted symmetric key, encrypted data, title
         let data_entry = DataEntry::new(signer_id, encrypted_symmetric_key, encrypted_data, title);
         self.storage_map.insert(&data_id, &data_entry);
+        // Add new id to user's list of data ids
         match self.data_ids_map.get(&account_id) {
             None => {
                 let set_id: Vec<u8> = format!("d-{}", account_id).as_bytes().to_vec();
@@ -157,6 +167,7 @@ impl Contract {
 
     pub fn delete_account(&mut self) {
         let account_id = env::signer_account_id();
+        // Remove account data from all maps
         self.account_map.remove(&account_id);
         self.contributors_map.remove(&account_id);
         if let Some(data_ids) = self.data_ids_map.get(&account_id) {
@@ -170,11 +181,14 @@ impl Contract {
     pub fn remove_data(&mut self, data_id: DataId) {
         let account_id = env::signer_account_id();
         let mut data_ids: UnorderedSet<DataId>;
+        // Get user's data ids
         match self.data_ids_map.get(&account_id) {
             Some(d) => data_ids = d,
             None => return,
         }
+        // Users can only delete their own data
         if data_ids.contains(&data_id) {
+            // Remove data entry
             self.storage_map.remove(&data_id);
             data_ids.remove(&data_id);
             self.data_ids_map.insert(&account_id, &data_ids);
@@ -238,13 +252,13 @@ mod tests {
         testing_env!(context.build());
         let mut contract = Contract::default();
 
-        contract.upload_data("alice.testnet".parse::<AccountId>().unwrap(), "My First Piece of Data".to_string(), "enc sym key!".to_string(), "enc data!".to_string(), "titel 1".to_string());
+        contract.upload_data("alice.testnet".parse::<AccountId>().unwrap(), "data-1".to_string(), "enc sym key!".to_string(), "enc data!".to_string(), "titel 1".to_string());
         // let error_2 = contract.upload_data("alice_near".parse::<AccountId>().unwrap(), "enc sym key!".to_string(), "enc data!".to_string());
         contract.upload_data("alice.testnet".parse::<AccountId>().unwrap(), "2nd-data-id".to_string(), "enc sym key 2!".to_string(), "enc data 2!".to_string(), "title 3".to_string());
         println!("Data ids: {:?}", contract.get_account_data_ids("alice.testnet".parse::<AccountId>().unwrap()));
-        println!("Uploader id 1: {:?}", contract.get_data_uploader("My First Piece of Data".to_string()));
+        println!("Uploader id 1: {:?}", contract.get_data_uploader("data-1".to_string()));
         println!("Key id 3: {:?}", contract.get_encrypted_symmetric_key("2nd-data-id".to_string()));
-        println!("Data id 3: {:?}", contract.get_encrypted_data("My First Piece of Data".to_string()));
+        println!("Data id 3: {:?}", contract.get_encrypted_data("data-1".to_string()));
         // contract.delete_account();
         // println!("Deleted: {:?}", contract.get_account_data_ids("alice.testnet".parse::<AccountId>().unwrap()));
         contract.remove_data("2nd-data-id".to_string());

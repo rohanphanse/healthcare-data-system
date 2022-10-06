@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom"
-import React, { useState, useEffect, useCallback } from "react";
-import AccountInfo from "./AccountInfo";
+import React, { useState, useEffect, useCallback } from "react"
+import AccountInfo from "./AccountInfo"
 import * as contract from "../utils/contract";
 import * as cryptography from "../utils/cryptography"
 
@@ -12,31 +12,33 @@ export default function DataEntry() {
         if (account.accountId) {
             let entry = {}
             let ids = await contract.getAccountDataIds(account.accountId)
+            // User does not own data
             if (!ids.includes(id)) {
                 entry.error = true
                 entry.errorMessage = `No data entry found for id of "${id}"`
                 updateDataEntry(entry)
-                return;
+                return
             }
             try {
+                // Fetch data entry from blockchain
                 const encryptedSymmetricKey = await contract.getEncryptedSymmetricKey(id)
                 const encryptedData = await contract.getEncryptedData(id)
                 const uploader = await contract.getDataUploader(id)
                 const title = await contract.getDataTitle(id)
                 const privateKey = await cryptography.importPrivateKey(JSON.parse(localStorage.getItem("privateKey")))
-                console.log(privateKey)
+                // Using local private key, decrypt the encrypted symmetric key
                 const decryptedSym = await cryptography.privateKeyDecrypt(privateKey, encryptedSymmetricKey) 
                 const symKey = await cryptography.importSymmetricKey(JSON.parse(decryptedSym).key)
                 const decIV = cryptography.hexToBuffer(JSON.parse(decryptedSym).iv)
+                // With the symmetric key, decrypt the encrypted data
                 const decryptedData = await cryptography.symmetricKeyDecrypt(symKey, decIV, encryptedData)
-                console.log("decdata", decryptedData)
                 updateDataEntry({
                     title,
                     uploader,
                     data: decryptedData
                 })
-            } catch (e) {
-                console.log(e)
+            } catch (error) {
+                console.log(error)
                 updateDataEntry({
                     error: true,
                     errorMessage: "Decryption error. Make sure you entered your private key correctly or check if you have access to this data."

@@ -34,7 +34,8 @@ export default function AccountInfo({ account }) {
                 </div>
             ) : (
                 <>
-                    <button onClick={login}>CONNECT WALLET</button>
+                    <div><b>By:</b> Rohan Phanse (<a href = "https://github.com/rohanphanse" target = "_blank">github</a>)</div>
+                    <button className = "connect-wallet" onClick={login}>CONNECT WALLET</button>
                 </>
             )}
             <style jsx = "true">{`
@@ -44,6 +45,10 @@ export default function AccountInfo({ account }) {
 
                 .title {
                     margin: 0;
+                }
+
+                .connect-wallet {
+                    margin-top: 10px;
                 }
             `}</style>
         </>

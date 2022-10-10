@@ -47,3 +47,7 @@ export async function getDataUploader(data_id) {
 export async function getDataTitle(data_id) {
     return await window.contract.get_data_title({ data_id });
 }
+
+export async function removeData(data_id) {
+    return await window.contract.remove_data({ data_id })
+}

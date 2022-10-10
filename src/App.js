@@ -10,7 +10,7 @@ const App = () => {
     // Get key pair
     const [keyPair, updateKeyPair] = useState({})
     const [showPrivateKeyField, updatePrivateKeyFieldVis] = useState(true)
-    const [privateKeyField, updatePrivateKeyField] = useState("Fetching private key...")
+    const [privateKeyField, updatePrivateKeyField] = useState(localStorage.getItem("privateKey") || "Fetching private key...")
     const privateKeyRead = createRef()
     const privateKeyInput = createRef()
 
@@ -59,7 +59,7 @@ const App = () => {
     }, [fetchKeyPair]);
 
     // Data entries
-    const [dataEntries, updateDataEntries] = useState([]);
+    const [dataEntries, updateDataEntries] = useState(JSON.parse(localStorage.getItem("data")) || []);
     const fetchDataEntries = useCallback(async () => {
         if (account.accountId) {
             let entries = []
@@ -70,19 +70,21 @@ const App = () => {
                 entries.push({ id, title })
             }
             updateDataEntries(entries)
-            console.log(entries)
+            localStorage.setItem("data", JSON.stringify(entries))
+            console.log("entries", entries)
         }
     }, [account.accountId])
     useEffect(() => {
         fetchDataEntries();
     }, [fetchDataEntries]);
 
-    const [contributors, updateContributors] = useState([])
+    const [contributors, updateContributors] = useState(JSON.parse(localStorage.getItem("contributors")) || [])
     const fetchContributors = useCallback(async () => {
         if (account.accountId) {
             const contributors = await contract.getAccountContributors(account.accountId)
             console.log(contributors)
             updateContributors(contributors)
+            localStorage.setItem("contributors", JSON.stringify(contributors))
         }
     }, [account.accountId])
     useEffect(() => {
@@ -136,11 +138,24 @@ const App = () => {
         }
     }
 
+    const deleteDataInput = createRef()
+    async function deleteData() {
+        const id = deleteDataInput.current.value
+        console.log("delete", id)
+        const result = await contract.removeData(id)
+        console.log("delres", result)
+    }
+
     const contributorInput = createRef()
     async function addContributor() {
         const newContributor = contributorInput.current.value
         await contract.addContributor(newContributor)
+    }
 
+    const removeContributorInput = createRef()
+    async function removeContributor() {
+        const removedContributor = removeContributorInput.current.value
+        await contract.removeContributor(removedContributor)
     }
 
     return (
@@ -206,6 +221,12 @@ const App = () => {
                         <button ref={uploadButton} onClick={async () => await uploadEncryptedData()}>Upload</button>
                     </div>
 
+                    <div className = "space-above">
+                        <b>Delete Data:</b>
+                        <input ref = {deleteDataInput} placeholder = "Enter Data ID..." />
+                        <button onClick={async () => await deleteData()}>Delete</button>
+                    </div>
+
                     <div className="section-title"><b>Contributors:</b> {contributors.length === 0 && "None"}</div>
                     <ul>
                         {contributors.map((c) => (
@@ -216,15 +237,26 @@ const App = () => {
                     </ul>
 
                     <div className="section-title">
-                        <b>Add Contributor:</b>
-                        <input ref = {contributorInput} />
-                        <button onClick={async () => await addContributor()}>Add</button>
+                        <div>
+                            <b>Add Contributor:</b>
+                            <input ref = {contributorInput} />
+                            <button onClick={async () => await addContributor()}>Add</button>
                         </div>
+                        <div>
+                            <b>Remove Contributor:</b>
+                            <input ref = {removeContributorInput} />
+                            <button onClick={async () => await removeContributor()}>Remove</button>
+                        </div>
+                    </div>
                 </>
             )}
             <style jsx>{`
                 .section-title {
                     margin-top: 50px;
+                }
+
+                .space-above {
+                    margin-top: 20px;
                 }
 
                 .private-key-section {

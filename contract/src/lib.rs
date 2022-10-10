@@ -216,6 +216,7 @@ mod tests {
         let mut contract = Contract::default();
 
         contract.add_account_info("I am a happy public key!".to_string());
+        // Re-adding account info will throw error
         // contract.add_account_info("I am a happy public key part 2!".to_string());
         let public_key = contract.get_account_public_key("alice.testnet".parse::<AccountId>().unwrap());
         assert_eq!(

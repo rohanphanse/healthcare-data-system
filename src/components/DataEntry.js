@@ -60,6 +60,7 @@ export default function DataEntry() {
                     <div><b>Title:</b> {dataEntry.title}</div>
                     <div><b>Data:</b> {dataEntry.data}</div>
                     <div><b>Uploader:</b> {dataEntry.uploader}</div>
+                    <div><b>ID:</b> {id}</div>
                 </>
             )}
             <div className = "back-link">

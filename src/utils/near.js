@@ -18,7 +18,7 @@ export async function initializeContract() {
         nearEnv.contractName,
         {
             viewMethods: ["get_account_public_key", "get_account_contributors", "get_account_data_ids", "get_encrypted_symmetric_key", "get_encrypted_data", "get_data_uploader", "get_data_title"],
-            changeMethods: ["add_account_info", "add_contributor", "remove_contributor", "upload_data"],
+            changeMethods: ["add_account_info", "add_contributor", "remove_contributor", "upload_data", "remove_data"],
         }
     );
 }

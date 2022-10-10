@@ -32,7 +32,7 @@ near call healthcare.rohanphanse.testnet add_account_info '{"public_key": "pub_k
 
 ## Get account public key (view)
 ```
-near view healthcare.rohanphanse.testnet get_account_public_key '{"account_id": "rohanphanse.testnet"}'
+near view healthcare.rohanphanse.testnet get_account_public_key '{"account_id": "rohanphanse-2.testnet"}'
 ```
 
 ## Add contributor (call)
@@ -92,5 +92,5 @@ near call healthcare.rohanphanse.testnet delete_account '{}' --accountId rohanph
 
 ## Remove data (call)
 ```
-near call healthcare.rohanphanse.testnet remove_data '{ "data_id": "rlp0fm" }' --accountId rohanphanse.testnet
+near call healthcare.rohanphanse.testnet remove_data '{ "data_id": "n624l7" }' --accountId rohanphanse-2.testnet
 ```

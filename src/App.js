@@ -113,6 +113,8 @@ const App = () => {
         // Export encrypted buffer as hexadecimal string and serialize data as JSON
         let encryptedSymmetricKey = await cryptography.publicKeyEncrypt(receiverPublicKey, 
             JSON.stringify({ key: keyString, iv: cryptography.bufferToHex(iv) })) 
+        // Upload encrypted data and encrypted symmetric key to blockchain
+        contract.uploadData(toAccount, encryptedSymmetricKey, encryptedData, title)
     }
 
     function copyPrivateKey() {

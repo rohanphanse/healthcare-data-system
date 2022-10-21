@@ -101,7 +101,8 @@ const App = () => {
     async function uploadEncryptedData() {
         let toAccount = showAccountInput ? account.accountId : accountInput.current.value
         // Fetch intended recipient's public key from blockchain 
-        const receiverPublicKey = showAccountInput ? keyPair.publicKey : await cryptography.importPublicKey(JSON.parse(await contract.getAccountPublicKey(toAccount)))
+        const receiverPublicKey = showAccountInput ? keyPair.publicKey : 
+            await cryptography.importPublicKey(JSON.parse(await contract.getAccountPublicKey(toAccount)))
         let title = titleInput.current.value
         let data = dataInput.current.value
         // Encrypt data with symmetric key
@@ -109,7 +110,9 @@ const App = () => {
         let symmetricKey = await cryptography.createSymmetricKey()
         let keyString = await cryptography.exportSymmetricKey(symmetricKey)
         let encryptedData = await cryptography.symmetricKeyEncrypt(symmetricKey, iv, data)
-        let encryptedSymmetricKey = await cryptography.publicKeyEncrypt(receiverPublicKey, JSON.stringify({ key: keyString, iv: cryptography.bufferToHex(iv) })) // Export encrypted buffer as hexadecimal string and serialize data as JSON
+        // Export encrypted buffer as hexadecimal string and serialize data as JSON
+        let encryptedSymmetricKey = await cryptography.publicKeyEncrypt(receiverPublicKey, 
+            JSON.stringify({ key: keyString, iv: cryptography.bufferToHex(iv) })) 
     }
 
     function copyPrivateKey() {

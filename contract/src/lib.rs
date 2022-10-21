@@ -85,12 +85,14 @@ impl Contract {
         self.contributors_map.insert(&account_id, &contributors);
     }
 
-    pub fn upload_data(&mut self, account_id: AccountId, data_id: DataId, encrypted_symmetric_key: String, encrypted_data: String, title: String) {
+    pub fn upload_data(&mut self, account_id: AccountId, data_id: DataId, encrypted_symmetric_key: String, 
+        encrypted_data: String, title: String) {
         let signer_id = env::signer_account_id();
         // Only the user and allowed contributors can upload data to the user's account
         if signer_id != account_id {
             let contributors_option = self.contributors_map.get(&account_id);
-            let unallowed_contributor_error = format!("{} is not an allowed contributor to {}'s account", signer_id, account_id);
+            let unallowed_contributor_error = format!("{} is not an allowed contributor to {}'s account", 
+                signer_id, account_id);
             // Prevent unauthorized contributors
             match contributors_option {
                 Some(contributors) => {
